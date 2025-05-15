@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        
+    - name: Print environment info
+      run: |
+        echo "Node.js version: $(node -v)"
+        echo "npm version: $(npm -v)"
+        
+    - name: Check file structure
+      run: |
+        echo "Repository structure:"
+        ls -la
+        
+    - name: Validate README
+      run: |
+        if [ -f "README.md" ]; then
+          echo "README.md exists"
+          cat README.md
+        else
+          echo "README.md does not exist"
+          exit 1
+        fi
