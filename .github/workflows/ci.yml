@@ -5,29 +5,31 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+  # This enables manual trigger from any branch
 
 jobs:
-  build:
+  pre-approval:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-      
+
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '16'
-        
+
     - name: Print environment info
       run: |
         echo "Node.js version: $(node -v)"
         echo "npm version: $(npm -v)"
-        
+
     - name: Check file structure
       run: |
         echo "Repository structure:"
         ls -la
-        
+
     - name: Validate README
       run: |
         if [ -f "README.md" ]; then
@@ -37,3 +39,27 @@ jobs:
           echo "README.md does not exist"
           exit 1
         fi
+
+  wait-for-approval:
+    needs: pre-approval
+    runs-on: ubuntu-latest
+    environment:
+      name: approval-environment
+      # This environment should be configured in the repository settings
+      # with required reviewers to approve the deployment
+
+    steps:
+    - name: Approval received
+      run: echo "Manual approval has been granted. Proceeding with next steps."
+
+  post-approval:
+    needs: wait-for-approval
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Post-approval tasks
+      run: |
+        echo "These tasks will only run after manual approval"
+        echo "Current date and time: $(date)"
