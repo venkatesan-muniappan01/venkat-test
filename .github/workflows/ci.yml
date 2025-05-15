@@ -13,53 +13,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
-    - name: Print environment info
-      run: |
-        echo "Node.js version: $(node -v)"
-        echo "npm version: $(npm -v)"
+      - name: Print environment info
+        run: |
+          echo "Node.js version: $(node -v)"
+          echo "npm version: $(npm -v)"
 
-    - name: Check file structure
-      run: |
-        echo "Repository structure:"
-        ls -la
+      - name: Check file structure
+        run: |
+          echo "Repository structure:"
+          ls -la
 
-    - name: Validate README
-      run: |
-        if [ -f "README.md" ]; then
-          echo "README.md exists"
-          cat README.md
-        else
-          echo "README.md does not exist"
-          exit 1
-        fi
+      - name: Validate README
+        run: |
+          if [ -f "README.md" ]; then
+            echo "README.md exists"
+            cat README.md
+          else
+            echo "README.md does not exist"
+            exit 1
+          fi
 
   wait-for-approval:
     needs: pre-approval
     runs-on: ubuntu-latest
-    environment:
-      name: approval-environment
-      # This environment should be configured in the repository settings
-      # with required reviewers to approve the deployment
 
     steps:
-    - name: Approval received
-      run: echo "Manual approval has been granted. Proceeding with next steps."
+      - name: Manual Approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: # Add your approvers usernames here if needed
+          minimum-approvals: 1
+          issue-title: "Approval required for workflow"
+          issue-body: "Please approve this workflow to continue with post-approval tasks"
+          exclude-workflow-initiator-as-approver: false
+          additional-approved-words: "lgtm,approve,approved,approval,yes,ok"
+          additional-denied-words: "deny,denied,no,reject,rejected"
 
   post-approval:
     needs: wait-for-approval
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Post-approval tasks
-      run: |
-        echo "These tasks will only run after manual approval"
-        echo "Current date and time: $(date)"
+      - name: Post-approval tasks
+        run: |
+          echo "These tasks will only run after manual approval"
+          echo "Current date and time: $(date)"
