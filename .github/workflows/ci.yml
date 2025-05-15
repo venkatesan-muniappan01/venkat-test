@@ -14,7 +14,7 @@ permissions:
 jobs:
   pre-approval:
     runs-on: ubuntu-latest
-
+    environment: prod
     steps:
       - uses: actions/checkout@v3
 
@@ -46,19 +46,12 @@ jobs:
   wait-for-approval:
     needs: pre-approval
     runs-on: ubuntu-latest
+    environment: prod
 
     steps:
-      - name: Manual Approval
-        uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ github.TOKEN }}
-          approvers: "venkatesan-muniappan01"
-          minimum-approvals: 1
-          issue-title: "Approval required for workflow"
-          issue-body: "Please approve this workflow to continue with post-approval tasks"
-          exclude-workflow-initiator-as-approver: false
-          additional-approved-words: "lgtm,approve,approved,approval,yes,ok"
-          additional-denied-words: "deny,denied,no,reject,rejected"
+      - name: Requires Approval
+        run: |
+          echo "Approval received. Proceeding with the workflow."
 
   post-approval:
     needs: wait-for-approval
